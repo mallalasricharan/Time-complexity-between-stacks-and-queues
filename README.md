@@ -1,1 +1,1 @@
-# Time-complexity-between-stacks-and-queues
+# Time-complexity-between-stacks and queues
