@@ -21,12 +21,11 @@ body{
 }
 
 .container{
-    max-width:1000px;
+    max-width:900px;
     margin:auto;
     background:#1e293b;
     padding:30px;
     border-radius:15px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.4);
 }
 
 h1{
@@ -45,26 +44,36 @@ textarea{
     width:100%;
     height:90px;
     padding:12px;
-    border:none;
     border-radius:8px;
     font-size:16px;
-    resize:none;
     margin-bottom:15px;
 }
 
+.button-group{
+    display:flex;
+    gap:10px;
+}
+
 button{
-    width:100%;
+    flex:1;
     padding:12px;
     background:#3b82f6;
     border:none;
     border-radius:8px;
     color:white;
-    font-size:16px;
     cursor:pointer;
 }
 
 button:hover{
     background:#2563eb;
+}
+
+.clear-btn{
+    background:#ef4444;
+}
+
+.clear-btn:hover{
+    background:#dc2626;
 }
 
 .cards{
@@ -80,56 +89,16 @@ button:hover{
     border-radius:12px;
 }
 
-.card h2{
-    color:#93c5fd;
-    margin-bottom:10px;
-}
-
-.card p{
-    margin:8px 0;
-}
-
 .result{
     margin-top:20px;
     background:#0f172a;
     padding:20px;
-    border-radius:12px;
     border-left:5px solid #22c55e;
 }
 
-.result h3{
-    color:#22c55e;
-    margin-bottom:10px;
-}
-
-.trace{
-    margin-top:20px;
-    background:#334155;
-    padding:20px;
-    border-radius:12px;
-}
-
-.trace h3{
-    color:#93c5fd;
-    margin-bottom:10px;
-}
-
-pre{
-    white-space:pre-wrap;
-    overflow-x:auto;
-    line-height:1.5;
-}
-.clear-btn{
-    background:#ef4444;
-}
-
-.clear-btn:hover{
-    background:#dc2626;
-}
 @media(max-width:768px){
-    .cards{
-        grid-template-columns:1fr;
-    }
+    .cards{grid-template-columns:1fr;}
+    .button-group{flex-direction:column;}
 }
 </style>
 </head>
@@ -138,196 +107,184 @@ pre{
 
 <div class="container">
 
-    <h1>Stack vs Queue Performance Analyzer</h1>
+<h1>Stack vs Queue Performance Analyzer</h1>
+<p class="subtitle">Time Complexity Comparison Tool</p>
 
-    <p class="subtitle">
-        Enter numbers separated by spaces and compare Stack and Queue operations
-    </p>
+<textarea id="input" placeholder="Example: 10, 20, 30, 40"></textarea>
 
-    <textarea id="input" placeholder="Example: 10,20,30,40,50"></textarea>
-<div style="display:flex; gap:10px;">
-    <button onclick="analyze()">Analyze Performance</button>
-
-    <button onclick="clearData()" class="clear-btn">
-        Clear
-    </button>
+<div class="button-group">
+<button onclick="analyze()">Analyze</button>
+<button onclick="clearData()" class="clear-btn">Clear</button>
 </div>
-    <div class="cards">
 
-        <div class="card">
-            <h2>Stack (LIFO)</h2>
-            <p><b>Execution Time:</b> <span id="stackTime">-</span></p>
-            <p><b>Time Complexity:</b> O(1)</p>
-            <p><b>Elements:</b> <span id="stackOps">-</span></p>
-        </div>
+<div class="cards">
 
-        <div class="card">
-            <h2>Queue (FIFO)</h2>
-            <p><b>Execution Time:</b> <span id="queueTime">-</span></p>
-            <p><b>Time Complexity:</b> O(1) Enqueue, O(n) Dequeue</p>
-            <p><b>Elements:</b> <span id="queueOps">-</span></p>
-        </div>
+<div class="card">
+<h2>Stack</h2>
+<p>Time: <span id="stackTime">-</span></p>
+</div>
 
-    </div>
+<div class="card">
+<h2>Queue</h2>
+<p>Time: <span id="queueTime">-</span></p>
+</div>
 
-    <div class="result">
-        <h3 id="winner">Result will appear here</h3>
-        <p id="reason"></p>
-    </div>
+</div>
 
-    <div class="trace">
-        <h3>Stack Trace</h3>
-        <pre id="stackTrace"></pre>
-    </div>
+<div class="result">
+<h3 id="winner">Result</h3>
+<p id="reason"></p>
+</div>
 
-    <div class="trace">
-        <h3>Queue Trace</h3>
-        <pre id="queueTrace"></pre>
-    </div>
+<div class="result">
+<h3>Time Complexity</h3>
+<p id="stackComplexity">Stack: -</p>
+<p id="queueComplexity">Queue: -</p>
+</div>
 
 </div>
 
 <script>
-function runStack(arr){
 
+// INPUT
+function getInputArray() {
+    let input = document.getElementById("input").value;
+
+    if (!input || input.trim() === "") {
+        alert("Please enter numbers!");
+        return null;
+    }
+
+    let arr = input.split(",").map(num => Number(num.trim()));
+
+    if (arr.some(isNaN)) {
+        alert("Invalid numbers!");
+        return null;
+    }
+
+    return arr;
+}
+
+// STACK
+function runStack(arr) {
     let stack = [];
-    let trace = "";
-    let step = 1;
 
-    for(const num of arr){
-
-        stack.push(num);
-
-        trace +=
-        "Step " + step + "\n" +
-        "Operation: Push " + num + "\n" +
-        "Current Stack: [" + stack.join(", ") + "]\n\n";
-
-        step++;
+    for (let i = 0; i < arr.length; i++) {
+        stack.push(arr[i]);
     }
 
-    while(stack.length){
-
-        const removed = stack.pop();
-
-        trace +=
-        "Step " + step + "\n" +
-        "Operation: Pop " + removed + "\n" +
-        "Current Stack: [" + stack.join(", ") + "]\n\n";
-
-        step++;
+    while (stack.length > 0) {
+        stack.pop();
     }
-
-    document.getElementById("stackTrace").textContent = trace;
 }
 
-function runQueue(arr){
-
-    let queue = [];
-    let trace = "";
-    let step = 1;
-
-    for(const num of arr){
-
-        queue.push(num);
-
-        trace +=
-        "Step " + step + "\n" +
-        "Operation: Enqueue " + num + "\n" +
-        "Current Queue: [" + queue.join(", ") + "]\n\n";
-
-        step++;
+// QUEUE
+class Queue {
+    constructor() {
+        this.arr = [];
+        this.front = 0;
     }
 
-    while(queue.length){
-
-        const removed = queue.shift();
-
-        trace +=
-        "Step " + step + "\n" +
-        "Operation: Dequeue " + removed + "\n" +
-        "Current Queue: [" + queue.join(", ") + "]\n\n";
-
-        step++;
+    enqueue(x) {
+        this.arr.push(x);
     }
 
-    document.getElementById("queueTrace").textContent = trace;
+    dequeue() {
+        return this.arr[this.front++];
+    }
+
+    size() {
+        return this.arr.length - this.front;
+    }
 }
-function clearData(){
 
+function runQueue(arr) {
+    let q = new Queue();
+
+    for (let i = 0; i < arr.length; i++) {
+        q.enqueue(arr[i]);
+    }
+
+    while (q.size() > 0) {
+        q.dequeue();
+    }
+}
+
+// ANALYZE
+function analyze() {
+
+    let input = getInputArray();
+    if (!input) return;
+
+    let testArray = [];
+
+    for (let i = 0; i < 20; i++) {
+        testArray = testArray.concat(input);
+    }
+
+    let iterations = 100;
+
+    let stackTotal = 0;
+    let queueTotal = 0;
+
+    let start, end;
+
+    // STACK
+    for (let i = 0; i < iterations; i++) {
+        let arrCopy = [...testArray];
+
+        start = performance.now();
+        runStack(arrCopy);
+        end = performance.now();
+
+        stackTotal += (end - start);
+    }
+
+    // QUEUE
+    for (let i = 0; i < iterations; i++) {
+        let arrCopy = [...testArray];
+
+        start = performance.now();
+        runQueue(arrCopy);
+        end = performance.now();
+
+        queueTotal += (end - start);
+    }
+
+    let stackTime = stackTotal / iterations;
+    let queueTime = queueTotal / iterations;
+
+    document.getElementById("stackTime").innerText =
+        stackTime.toFixed(6) + " ms";
+
+    document.getElementById("queueTime").innerText =
+        queueTime.toFixed(6) + " ms";
+
+    let winner =
+        stackTime < queueTime ? "Stack is Faster" : "Queue is Faster";
+
+    document.getElementById("winner").innerText = winner;
+
+    document.getElementById("reason").innerText =
+        "Both Stack and Queue are O(1) per operation. Differences come from JavaScript engine memory behavior.";
+
+    // TIME COMPLEXITY DISPLAY
+    document.getElementById("stackComplexity").innerText =
+        "Stack: O(n)";
+
+    document.getElementById("queueComplexity").innerText =
+        "Queue: O(n)";
+}
+
+// CLEAR
+function clearData() {
     document.getElementById("input").value = "";
-
-    document.getElementById("stackTime").textContent = "-";
-    document.getElementById("queueTime").textContent = "-";
-
-    document.getElementById("stackOps").textContent = "-";
-    document.getElementById("queueOps").textContent = "-";
-
-    document.getElementById("winner").textContent =
-        "Result will appear here";
-
-    document.getElementById("reason").textContent = "";
-
-    document.getElementById("stackTrace").textContent = "";
-    document.getElementById("queueTrace").textContent = "";
-}
-function analyze(){
-
-    const input = document.getElementById("input").value.trim();
-
-    if(!input){
-        alert("Please enter numbers separated by commas (,)");
-        return;
-    }
-
-    if(!input.includes(",")){
-        alert("Use commas to separate numbers.\nExample: 10, 20, 30");
-        return;
-    }
-
-    const numbers = input
-        .split(",")
-        .map(num => num.trim())
-        .map(Number);
-
-    if(numbers.some(isNaN)){
-        alert("Only numbers are allowed");
-        return;
-    }
-
-    const n = numbers.length;
-
-    document.getElementById("stackOps").textContent = n;
-    document.getElementById("queueOps").textContent = n;
-
-    const s1 = performance.now();
-    runStack(numbers);
-    const s2 = performance.now();
-
-    const q1 = performance.now();
-    runQueue(numbers);
-    const q2 = performance.now();
-
-    const stackTime = (s2 - s1).toFixed(4);
-    const queueTime = (q2 - q1).toFixed(4);
-
-    document.getElementById("stackTime").textContent = stackTime + " ms";
-    document.getElementById("queueTime").textContent = queueTime + " ms";
-
-    if(Number(stackTime) < Number(queueTime)){
-
-        document.getElementById("winner").textContent = "🏆 Stack is Faster";
-
-        document.getElementById("reason").textContent =
-        "Stack follows LIFO (Last In First Out). Push and Pop operations are O(1).";
-
-    }else{
-
-        document.getElementById("winner").textContent = "🏆 Queue Appears Faster";
-
-        document.getElementById("reason").textContent =
-        "Queue follows FIFO (First In First Out). Dequeue uses shift(), which is O(n).";
-    }
+    document.getElementById("stackTime").innerText = "-";
+    document.getElementById("queueTime").innerText = "-";
+    document.getElementById("winner").innerText = "Result";
+    document.getElementById("reason").innerText = "";
+    document.getElementById("stackComplexity").innerText = "Stack: -";
+    document.getElementById("queueComplexity").innerText = "Queue: -";
 }
 
 </script>
